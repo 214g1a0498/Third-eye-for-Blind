@@ -1,0 +1,68 @@
+#define TRIG_PIN 5        // Ultrasonic sensor TRIG pin
+#define ECHO_PIN 18       // Ultrasonic sensor ECHO pin
+#define BUZZER_PIN 26     // Buzzer pin
+#define RED_LED 21        // TriLED Red pin
+#define GREEN_LED 22      // TriLED Green pin
+#define BLUE_LED 23       // TriLED Blue pin
+#define VIBRATOR_PIN 27   // Vibration motor pin
+
+void setup() {
+  Serial.begin(115200);   // Initialize serial communication
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+  pinMode(BLUE_LED, OUTPUT);
+  pinMode(VIBRATOR_PIN, OUTPUT);
+
+  Serial.println("System Initialized");
+}
+
+void loop() {
+  long distance = getDistance(); // Measure distance using the ultrasonic sensor
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Determine LED color, buzzer, and vibration based on distance
+  if (distance > 0 && distance < 20) {
+    // Very close: Red LED, buzzer on, vibration on
+    digitalWrite(RED_LED, HIGH);
+    digitalWrite(GREEN_LED, LOW);
+    digitalWrite(BLUE_LED, LOW);
+    digitalWrite(BUZZER_PIN, HIGH);
+    digitalWrite(VIBRATOR_PIN, HIGH);
+  } 
+  else if (distance >= 20 && distance < 50) {
+    // Medium distance: Yellow (Red + Green) LED, buzzer off, vibration off
+    digitalWrite(RED_LED, HIGH);
+    digitalWrite(GREEN_LED, HIGH);
+    digitalWrite(BLUE_LED, LOW);
+    digitalWrite(BUZZER_PIN, LOW);
+    digitalWrite(VIBRATOR_PIN, LOW);
+  } 
+  else {
+    // Safe distance: Green LED, buzzer off, vibration off
+    digitalWrite(RED_LED, LOW);
+    digitalWrite(GREEN_LED, HIGH);
+    digitalWrite(BLUE_LED, LOW);
+    digitalWrite(BUZZER_PIN, LOW);
+    digitalWrite(VIBRATOR_PIN, LOW);
+  }
+
+  delay(100); // Short delay for stability
+}
+
+// Function to measure distance using the ultrasonic sensor
+long getDistance() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  long duration = pulseIn(ECHO_PIN, HIGH, 30000); // Measure echo time with a timeout
+  long distance = duration * 0.034 / 2; // Calculate distance in cm
+  return distance;
+}
